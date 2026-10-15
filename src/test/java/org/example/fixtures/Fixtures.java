@@ -168,4 +168,51 @@ public final class Fixtures {
         public InnerSample(List<String> items) {
         }
     }
+
+    @Generatable
+    public static class Library {
+        private final String name;
+
+        public Library(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Generatable
+        public class Book {
+            private final List<String> pages;
+
+            public Book(List<String> pages) {
+                this.pages = pages;
+            }
+
+            public List<String> getPages() {
+                return pages;
+            }
+
+            public Library getLibrary() {
+                return Library.this;
+            }
+        }
+
+        @Generatable
+        public class Shelf {
+            private final int number;
+
+            public Shelf(int number) {
+                this.number = number;
+            }
+
+            public int getNumber() {
+                return number;
+            }
+
+            public Library getLibrary() {
+                return Library.this;
+            }
+        }
+    }
 }

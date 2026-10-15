@@ -164,10 +164,6 @@ public class Generator {
     }
 
     private Object instantiate(Class<?> clazz, int depth) {
-        if (clazz.getEnclosingClass() != null && !Modifier.isStatic(clazz.getModifiers())) {
-            throw new GenerationException("Класс " + clazz.getName() + " — внутренний (не static): "
-                    + "для создания нужен объект внешнего класса, такие классы не поддерживаются");
-        }
         List<Constructor<?>> constructors = candidateConstructors(clazz);
         IllegalArgumentException lastRejection = null;
 
@@ -208,6 +204,13 @@ public class Generator {
 
     private Object[] arguments(Class<?> clazz, Constructor<?> constructor, int depth) {
         Type[] types = constructor.getGenericParameterTypes();
+        Class<?>[] plain = constructor.getParameterTypes();
+        if (types.length != plain.length) {
+            Type[] full = new Type[types.length + 1];
+            full[0] = plain[0];
+            System.arraycopy(types, 0, full, 1, full.length - 1);
+            types = full;
+        }
         Object[] args = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             try {

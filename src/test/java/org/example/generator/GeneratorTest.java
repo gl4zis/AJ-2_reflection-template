@@ -18,6 +18,7 @@ import org.example.fixtures.Fixtures.EmptyEnum;
 import org.example.fixtures.Fixtures.EvenNumber;
 import org.example.fixtures.Fixtures.Holder;
 import org.example.fixtures.Fixtures.Impossible;
+import org.example.fixtures.Fixtures.Library;
 import org.example.fixtures.Fixtures.NoPublicConstructor;
 import org.example.fixtures.Fixtures.NotAnnotated;
 import org.example.fixtures.Fixtures.Orphan;
@@ -200,6 +201,21 @@ class GeneratorTest {
         }
 
         @Test
+        void innerClassWithGenericParameterKeepsElementType() {
+            Library.Book book = generator.generateValueOfType(Library.Book.class);
+            assertNotNull(book.getLibrary());
+            assertSizeInRange(book.getPages().size());
+            book.getPages().forEach(page -> assertInstanceOf(String.class, page));
+        }
+
+        @Test
+        void innerClassWithoutGenericParameters() {
+            Library.Shelf shelf = generator.generateValueOfType(Library.Shelf.class);
+            assertNotNull(shelf.getLibrary());
+            assertFalse(shelf.getLibrary().getName().isEmpty());
+        }
+
+        @Test
         void recordIsSupported() {
             assertInstanceOf(Point.class, generator.generateValueOfType(Point.class));
         }
@@ -292,10 +308,10 @@ class GeneratorTest {
     @Nested
     class Failures {
         @Test
-        void innerNonStaticClassIsRejected() {
+        void innerClassFailsWhenOuterClassIsNotGeneratable() {
             GenerationException e = assertThrows(GenerationException.class,
                     () -> generator.generateValueOfType(Fixtures.InnerSample.class));
-            assertTrue(e.getMessage().contains("не static"), e.getMessage());
+            assertTrue(e.getMessage().contains(Fixtures.class.getName()), e.getMessage());
         }
 
         @Test
